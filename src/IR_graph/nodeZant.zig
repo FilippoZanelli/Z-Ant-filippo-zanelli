@@ -35,6 +35,11 @@ pub const NodeZant = struct {
         self.next.deinit();
     }
 
+ /// Adds a new node to the next list.
+    pub fn add_next(self: *NodeZant, next_node: *NodeZant) !void {
+        try self.next.append(next_node);
+    }
+
     pub fn ProtoTensor2Tensor(T: type, proto: TensorProto) !Tensor(T) {
         // Type Check
         if (!isMatchingType(T, proto.data_type)) {
