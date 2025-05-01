@@ -30,4 +30,36 @@ pub const GraphZant = struct {
         }
         self.nodes.deinit();
     }
+
+ // Adds a new node to the graph.
+
+    pub fn build_graph(self: *GraphZant) !void {
+
+        // create all the nodes
+        for (self.graphProto.node) |nodeProto| {
+            const node = try NodeZant.init(nodeProto);
+            try self.nodes.append(&node);
+        }
+
+        //hashmap for the outputs for the producers
+
+        var output_map = std.AutoHashMap([]*const u8, *NodeZant).init(allocator);
+
+        //populate the output map with the nodes
+        for (self.nodes) |node| {
+            for (node.nodeProto.output) |output| {
+                try output_map.put(output, node);
+            }
+        }
+
+        // use the hashmap to find the producers of the inputs
+        for (self.nodes) |customer| {
+            for (customer.nodeProto.input) |input| {
+                const producer = output_map.get(input);
+                if (producer) |p| {
+                    try p.add_next(customer);
+                }
+            }
+        }
+    }
 };
